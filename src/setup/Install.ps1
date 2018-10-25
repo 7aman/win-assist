@@ -1,16 +1,49 @@
-$RootPath = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-function Add-To-Path {
-    [Environment]::SetEnvironmentVariable("Path", $RootPath + ";" + $Env:Path , [EnvironmentVariableTarget]::User)
+function Get-User-Only-Paths {
+    $machine = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
+    $all = [System.Environment]::GetEnvironmentVariable("Path", "User")
+    return ($all.Split(';') | Where-Object { $_ -notin $machine.Split(';') }) -join ';'
 }
+
+function Add-To-Path {
+    if ($Root -In $user_only.Split(";") ) {
+        Write-Host $Root," is already in User Path."
+        $Setting.Settings.Path.addedByMe = $false
+        $Setting.Settings.Path.path = "{$Root}"
+        return $false
+    } else {
+        [Environment]::SetEnvironmentVariable("Path", $Root + ";" + $user_only , "User")
+        Write-Host $Root," is added to User Path."
+        $Setting.Settings.Path.addedByMe = $false
+        $Setting.Settings.Path.path = "{$Root}"
+        return $true
+    }
+}
+
 function Write-Path-To-File {
     $file = ($PSScriptRoot) + "\path.txt"
-    echo $file
-    Out-File -FilePath $file -InputObject $RootPath -Encoding utf8 
+    Out-File -FilePath $file -InputObject $Root -Encoding utf8 
 }
-# echo $Env:path
+[XML]$Setting = Get-Content -Path ".\setup\setting.xml"
+Write-Host $Setting.Settings.Install.Installed
+Write-Host $Setting.Settings.Path.addedByMe
+Write-Host $Setting.Settings.Path.path
+$Root = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+$user_only = $(Get-User-Only-Paths)
+if ($Setting.Settings.Install.Installed){
+    Write-Host "Already Installed. Use force mode?"
+} else {
+    Add-To-Path
+    $Setting.Settings.Install.Installed = $false
+}
+$Setting.Save(".\setup\setting.xml")
 
+# Write-Path-To-File
+# foreach ($path in ([System.Environment]::GetEnvironmentVariable("Path", "User")).split(";")){
+#     Write-Host $path
+# }
 
-Add-To-Path
-Write-Path-To-File
-Write-Host ([System.Environment]::GetEnvironmentVariable("Path", [EnvironmentVariableTarget]::User)).split(";")
-Pause
+# Write-Host $Setting_XML
+# foreach ($path in $user_only.split(";")){
+#     Write-Host $path
+# }
+# Pause
