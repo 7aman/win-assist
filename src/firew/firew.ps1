@@ -11,16 +11,17 @@ function print_help {
 }
 Switch ($args[0]) {
     "on" {
-        Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True | Wait-Job
         Write-Host  "Enabling Firewall..."  -ForegroundColor Yellow
+        Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True | Wait-Job
+        Write-Host "Done!" -ForegroundColor Green
     }
     "off" {
-        Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False | Wait-Job
         Write-Host  "Disabling Firewals...     "  -ForegroundColor Yellow
+        Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False | Wait-Job
+        Write-Host "Done!" -ForegroundColor Red
     }
     default{
         print_help
     }
 }
-Write-Host "Done!" -ForegroundColor Red
 Pause

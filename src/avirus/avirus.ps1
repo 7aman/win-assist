@@ -19,7 +19,7 @@ Switch ($args[0]) {
     "off"   {
         Write-Host  "Disabling 'Real-time Protection' for Michrosoft Windows Defender Anti-Virus..."  -ForegroundColor Yellow
         Set-MpPreference -DisableRealtimeMonitoring $true | Wait-Job
-        Write-Host  "Done!"  -ForegroundColor Green
+        Write-Host  "Done!"  -ForegroundColor Red
      }
     default {
         print_help
