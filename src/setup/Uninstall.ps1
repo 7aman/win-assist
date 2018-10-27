@@ -1,18 +1,14 @@
-$file_path = $PSScriptRoot + ".\path.txt"
-$Insatall_Path = (Get-Content $file_path ).ToString()
-$Current_Root_Path = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
-if ($Current_Root_Path -ne $Insatall_Path) {
-    Write-Host "Installation Folder was moved from ", $Insatall_Path " to ", $Current_Root_Path -ForegroundColor Yellow
-    Write-Host "Move it back to ",$Insatall_Path, " then run unisntall again." -ForegroundColor Yellow
-    Exit-PSSession
+$RootPath = Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
+function Get-User-Only-Paths {
+    $machine = [System.Environment]::GetEnvironmentVariable("Path", "Machine")
+    $all = [System.Environment]::GetEnvironmentVariable("Path", "User")
+    return ($all.Split(';') | Where-Object { $_ -notin $machine.Split(';') }) -join ';'
 }
+
 function Remove-From-Path {
-    $path = [System.Environment]::GetEnvironmentVariable("Path", [EnvironmentVariableTarget]::User)
-    # Remove unwanted elements
+    $path = Get-User-Only-Paths
     $path = ($path.Split(';') | Where-Object { $_ -ne $RootPath }) -join ';'
-    # Set it
-    [System.Environment]::SetEnvironmentVariable("Path", $path, [EnvironmentVariableTarget]::User)
+    [System.Environment]::SetEnvironmentVariable("Path", $path, 'User')
+    Write-Host "'"$RootPath"' is removed from PATH" -ForegroundColor Green
 }
-Write-Host "Removing from Path" -ForegroundColor Yellow
 Remove-From-Path
-Pause
