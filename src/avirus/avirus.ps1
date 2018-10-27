@@ -6,9 +6,10 @@ function print_help {
     Write-Host  "   avirus on"  -ForegroundColor Green
     Write-Host  "               : to enable antivirus"  -ForegroundColor Green
     Write-Host  "   avirus off"  -ForegroundColor Green
-    Write-Host  "               : to disable antivirus ( no argument or anything that is not 'on'"  -ForegroundColor Green
+    Write-Host  "               : to disable antivirus "  -ForegroundColor Green
     Write-Host "*********************************************************************************"
 }
+
 Switch ($args[0]) {
     "on" {
         Write-Host  "Enabling 'Real-time Protection' for Michrosoft Windows Defender Anti-Virus..."  -ForegroundColor Yellow
