@@ -1,4 +1,5 @@
-src/setup/path.txt
-src/test.ps1
+*/*/test.ps1
+*/test.ps1
+test.ps1
 .vscode
 *.lnk
