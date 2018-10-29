@@ -57,12 +57,12 @@ function Test-AdapterName($given_string){
 function Test-IPSubnet($given_string){
     if ($given_string -match $ValidIpAddressRegex){
         $global:PrivateGateway = $given_string
-        Write-Host "'$given_string' is an IP."
+        Write-Host "    '$given_string' is an IP." -ForegroundColor Green
         return $true
     }
     if ($given_string -match $ValidSubnetRegex) {
         $global:PrivateSubnet = $given_string
-        Write-Host "'$given_string' is a Subnet."
+        Write-Host "    '$given_string' is a Subnet." -ForegroundColor Green
         return $true
         
     }
@@ -70,7 +70,7 @@ function Test-IPSubnet($given_string){
         $IPSUBNET = $ValidIPSubnetRegex.Match($given_string).groups
         $global:PrivateGateway = $IPSUBNET[1].Value
         $global:PrivateSubnet = $IPSUBNET[2].Value
-        Write-Host "'$given_string' is an IP/Subnet."
+        Write-Host "    '$given_string' is an IP/Subnet." -ForegroundColor Green
         return $true
     }
     return $false
@@ -87,6 +87,7 @@ function Write-AdapterNames {
 }
 
 # Argument Validation and Assignment
+Write-Host "Argument Checking:" -ForegroundColor Yellow
 $counter = 0
 foreach ($arg in $args){
     if ($arg -eq "--list-NICs"){
@@ -95,12 +96,12 @@ foreach ($arg in $args){
     if (Test-AdapterName($arg)){
         if ($counter -eq 0){
             $global:PublicNIC = $arg
-            Write-Host "'$arg' will be used as public NIC." -ForegroundColor Green
+            Write-Host "    '$arg' will be used as public NIC." -ForegroundColor Green
             $counter++
             continue
         } elseif ($counter -eq 1) {
             $global:PrivateNIC = $arg
-            Write-Host "'$arg' will be used as private NIC."  -ForegroundColor Green
+            Write-Host "    '$arg' will be used as private NIC."  -ForegroundColor Green
             $counter++
             continue
         } else {
@@ -115,13 +116,13 @@ foreach ($arg in $args){
             continue
     }
     else {
-        Write-Host "'$arg' is not valid. Ignored." -ForegroundColor Red
+        Write-Host "    '$arg' is not valid. Ignored." -ForegroundColor Red
     }
 }
 
 Write-Host ""
-Write-Host "Running with these Values: " -ForegroundColor Green
-Write-Host "netshare.ps1 -PublicNIC '$PublicNIC' -PrivateNIC  '$PrivateNIC' -PrivateGateway '$PrivateGateway' -PrivateSubnet '$PrivateSubnet'" -ForegroundColor Green
+Write-Host "Running with these Values: " -ForegroundColor Yellow
+Write-Host "    netshare.ps1 -PublicNIC '$PublicNIC' -PrivateNIC  '$PrivateNIC' -PrivateGateway '$PrivateGateway' -PrivateSubnet '$PrivateSubnet'" -ForegroundColor Green
 
 # Constants
 $public = 0 
