@@ -119,18 +119,15 @@ function  Set-IP {
     Write-Host "Setting IP Address using this command:" -ForegroundColor Green
     Write-Host "    netsh interface ip set address $NIC static" $IPS[0], $global:SUBNETS[$SUB], $IPS[1]
     Start-Process netsh "interface ip set address $NIC static", $IPS[0], $global:SUBNETS[$SUB], $IPS[1] -NoNewWindow -wait
-    Write-Host "OK. IP is set successfully." -ForegroundColor  Green
 
     if ($IPS[2]) {
         Write-Host "Setting Primary DNS using this command:" -ForegroundColor Green
         Write-Host "    netsh interface ip set dnsservers $NIC static", $IPS[2]
         Start-Process netsh "interface ip set dnsserver $NIC static", $IPS[2] -NoNewWindow -wait
-        Write-Host "OK. Primary DNS is set successfully." -ForegroundColor  Green
         if ($IPS[3]) {
             Write-Host "Setting Alternative DNS using this command:" -ForegroundColor Green
             Write-Host "    netsh interface ip add dnsservers $NIC", $IPS[3],"index=2"
             Start-Process netsh "interface ip add dnsserver $NIC", $IPS[3],"index=2" -NoNewWindow -wait
-            Write-Host "OK. Alternative DNS is set successfully." -ForegroundColor  Green
         }
     } else {
         # delete previous configured dns
@@ -161,7 +158,6 @@ function Add-IP {
     Write-Host "Add IP Address using this command:" -ForegroundColor Green
     Write-Host "    netsh interface ip add address", $NIC, $IPS[0], $global:SUBNETS[$SUB], $IPS[1]
     Start-Process netsh "interface ip add address", $NIC, $IPS[0], $global:SUBNETS[$SUB], $IPS[1] -NoNewWindow -wait
-    Write-Host "OK. IP is added successfully." -ForegroundColor  Green
 }
 
 function Remove-IP {
@@ -179,7 +175,6 @@ function Remove-IP {
     Write-Host "Delete IP Address using this command:" -ForegroundColor Green
     Write-Host "    netsh interface ip delete address", $NIC, $IP
     Start-Process netsh "interface ip delete address", $NIC, $IP -NoNewWindow -wait
-    Write-Host "OK. IP is deleted successfully." -ForegroundColor  Green
 }
 
 function  Connect-Internet {
