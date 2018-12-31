@@ -1,2 +1,3 @@
 # my-windows-scripts
-My personal scripts that I write to help automating boring stuff.
+Personal windows scripts to help doing stuffs more easily.
+Mostly Powershell Scripts
