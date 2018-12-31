@@ -113,37 +113,73 @@ function  Set-IP {
     if (!$NIC) { $NIC = "Ethernet" }
     if (!$IPS) {
         $IPS += "192.168.1.199"
-        $IPS += ""
+        $IPS += " "
     }
+    if (!$IPS[1]) { $IPS += " " }
     Write-Host "Setting IP Address using this command:" -ForegroundColor Green
-    Write-Host "    netsh interface ip set address $NIC  static "$IPS[0], $global:SUBNETS[$SUB],$IPS[1]
-    Start-Process netsh "interface ip set address",$NIC,"static",$IPS[0],$global:SUBNETS[$SUB],$IPS[1] -NoNewWindow -wait
-    if (!$LastExitCode) {
-        Write-Host "OK. IP is set successfully." -ForegroundColor  Green
-        Write-Host
-    }
+    Write-Host "    netsh interface ip set address $NIC static" $IPS[0], $global:SUBNETS[$SUB], $IPS[1]
+    Start-Process netsh "interface ip set address $NIC static", $IPS[0], $global:SUBNETS[$SUB], $IPS[1] -NoNewWindow -wait
+    Write-Host "OK. IP is set successfully." -ForegroundColor  Green
+
     if ($IPS[2]) {
         Write-Host "Setting Primary DNS using this command:" -ForegroundColor Green
-        Write-Host "    netsh interface ip set dnsservers $NIC static",$IPS[2]
-        Start-Process netsh "interface ip set dnsserver",$NIC,"static",$IPS[2] -NoNewWindow -wait
-        if (!$LastExitCode) {
-            Write-Host "OK. Primary DNS is set successfully." -ForegroundColor  Green
-            Write-Host
-        }
+        Write-Host "    netsh interface ip set dnsservers $NIC static", $IPS[2]
+        Start-Process netsh "interface ip set dnsserver $NIC static", $IPS[2] -NoNewWindow -wait
+        Write-Host "OK. Primary DNS is set successfully." -ForegroundColor  Green
         if ($IPS[3]) {
             Write-Host "Setting Alternative DNS using this command:" -ForegroundColor Green
-            Write-Host "    netsh interface ip add dnsservers $NIC",$IPS[3],"index=2"
-            Start-Process netsh "interface ip add dnsserver",$NIC,$IPS[3],"index=2" -NoNewWindow -wait
-            if (!$LastExitCode) {
-                Write-Host "OK. Alternative DNS is set successfully." -ForegroundColor  Green
-                Write-Host
-            }
+            Write-Host "    netsh interface ip add dnsservers $NIC", $IPS[3],"index=2"
+            Start-Process netsh "interface ip add dnsserver $NIC", $IPS[3],"index=2" -NoNewWindow -wait
+            Write-Host "OK. Alternative DNS is set successfully." -ForegroundColor  Green
         }
     } else {
         # delete previous configured dns
         Start-Process netsh "interface ip delete dns $NIC all" -NoNewWindow -wait -RedirectStandardOutput "NUL"
     }  
 
+}
+
+function Add-IP {
+    $ARGSS = $global:Arguments | Select-Object -Skip 1
+    $NIC = ""
+    $IPS = @()
+    $SUB = ""
+    foreach ($arg in $ARGSS){
+        if (Test-AdapterName($arg)) { if (!$NIC) { $NIC = $arg } }
+        $IP, $eSUB = Test-IPSubnet($arg)
+        if ($eSub) { if (!$SUB) { $SUB = $eSUB } }
+        if ($IP) { $IPS += $IP }
+    }
+    if (!$SUB) { $SUB = 24 }
+    if (!$NIC) { $NIC = "Ethernet" }
+    if (!$IPS) {
+        $IPS += "192.168.1.199"
+        $IPS += " "
+    }
+    if (!$IPS[1]) { $IPS += " " }
+
+    Write-Host "Add IP Address using this command:" -ForegroundColor Green
+    Write-Host "    netsh interface ip add address", $NIC, $IPS[0], $global:SUBNETS[$SUB], $IPS[1]
+    Start-Process netsh "interface ip add address", $NIC, $IPS[0], $global:SUBNETS[$SUB], $IPS[1] -NoNewWindow -wait
+    Write-Host "OK. IP is added successfully." -ForegroundColor  Green
+}
+
+function Remove-IP {
+    $ARGSS = $global:Arguments | Select-Object -Skip 1
+    $NIC = ""
+    $IP = ""
+    foreach ($arg in $ARGSS){
+        if (Test-AdapterName($arg)) { if (!$NIC) { $NIC = $arg } }
+        $eIP, $eSUB = Test-IPSubnet($arg)
+        if (!$IP) { $IP = $eIP }
+    }
+    if (!$NIC) { $NIC = "Ethernet" }
+    if (!$IP) { $IP = "192.168.1.199" }
+
+    Write-Host "Delete IP Address using this command:" -ForegroundColor Green
+    Write-Host "    netsh interface ip delete address", $NIC, $IP
+    Start-Process netsh "interface ip delete address", $NIC, $IP -NoNewWindow -wait
+    Write-Host "OK. IP is deleted successfully." -ForegroundColor  Green
 }
 
 function  Connect-Internet {
@@ -194,17 +230,23 @@ function  Connect-Internet {
     $netshare.INetSharingConfigurationForINetConnection($privateadapter).EnableSharing($private)
 
 
-    # Default IP of private NIC is '192.168.137.1', not very common range. I like to change it to '192.168.1.2'
+    # Default IP of private NIC is '192.168.137.1', not very common range. I like to change it to '192.168.1.199'
     Write-host "Setting IP Address of '$PrivateNIC' to '$PrivateGateway' / '$PrivateSubnet'" -ForegroundColor Yellow 
     $Subnet = $global:SUBNETS[$PrivateSubnet]
     Start-Process netsh "interface ip set address",$PrivateNIC,"static",$PrivateGateway,$Subnet -NoNewWindow -wait
     Start-Process netsh "interface ip delete dns $PrivateNIC all" -NoNewWindow -wait -RedirectStandardOutput "NUL"
+
+    Write-host "Checking Internet Connectivity:" -ForegroundColor Yellow 
+    Start-Process ping "8.8.8.8" -NoNewWindow -wait
 }
 
 $action = $(Test-ActionArgument)
 if ($action -eq "list") { Show-IPList }
 elseif ($action -eq "set") { Set-IP }
+elseif ($action -eq "add") { Add-IP }
+elseif ($action -eq "del") { Remove-IP }
 elseif ($action -eq "share") { Connect-Internet}
 
+Write-Host
 Write-Host "Done!" -ForegroundColor Green
 Pause
