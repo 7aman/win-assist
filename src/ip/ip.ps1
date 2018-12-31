@@ -139,13 +139,72 @@ function  Set-IP {
                 Write-Host
             }
         }
+    } else {
+        # delete previous configured dns
+        Start-Process netsh "interface ip delete dns $NIC all" -NoNewWindow -wait -RedirectStandardOutput "NUL"
     }  
 
+}
+
+function  Connect-Internet {
+    $PublicNIC = ""
+    $PrivateNIC = ""
+    $PrivateGateway = ""
+    $PrivateSubnet = ""
+    $ARGSS = $global:Arguments | Select-Object -Skip 1
+    foreach ($arg in $ARGSS){
+        if (Test-AdapterName($arg)) {
+            if (!$PublicNIC) { $PublicNIC = $arg }
+            elseif (!$PrivateNIC) { $PrivateNIC = $arg}
+        }
+        $IP, $SUB = Test-IPSubnet($arg)
+        if ($Sub) { if (!$PrivateSubnet) { $PrivateSubnet = $SUB } }
+        if ($IP)  { if (!$PrivateGateway) { $PrivateGateway = $IP } }
+    }
+    
+    if (!$PublicNIC) { $PublicNIC = "Wi-Fi" }
+    if (!$PrivateNIC) { $PrivateNIC = "Ethernet" }
+    if (!$PrivateSubnet) { $PrivateSubnet = 24 }
+    if (!$PrivateGateway) { $PrivateGateway = "192.168.1.199" }
+
+    # Constants
+    $public = 0 
+    $private = 1 
+
+    Write-Host
+    Write-Host "Creating netshare object..." -ForegroundColor Yellow
+    $netshare = New-Object -ComObject HNetCfg.HNetShare
+
+    Write-Host
+    Write-Host "Getting private adapter..." -ForegroundColor Yellow
+    $privateadapter = $netshare.EnumEveryConnection | Where-Object {$netshare.NetConnectionProps($_).Name -eq $PrivateNIC }
+
+    Write-Host "Getting public adapter..." -ForegroundColor Yellow
+    $publicadapter = $netshare.EnumEveryConnection | Where-Object {$netshare.NetConnectionProps($_).Name -eq $PublicNIC}
+
+    $netshare.INetSharingConfigurationForINetConnection($privateadapter).DisableSharing()
+
+    Write-Host
+    Write-host "Modify public adapter..." -ForegroundColor Yellow 
+    $netshare.INetSharingConfigurationForINetConnection($publicadapter).DisableSharing()
+    $netshare.INetSharingConfigurationForINetConnection($publicadapter).EnableSharing($public)
+
+    Write-Host "Modify private adapter..."  -ForegroundColor Yellow
+    $netshare.INetSharingConfigurationForINetConnection($privateadapter).DisableSharing()
+    $netshare.INetSharingConfigurationForINetConnection($privateadapter).EnableSharing($private)
+
+
+    # Default IP of private NIC is '192.168.137.1', not very common range. I like to change it to '192.168.1.2'
+    Write-host "Setting IP Address of '$PrivateNIC' to '$PrivateGateway' / '$PrivateSubnet'" -ForegroundColor Yellow 
+    $Subnet = $global:SUBNETS[$PrivateSubnet]
+    Start-Process netsh "interface ip set address",$PrivateNIC,"static",$PrivateGateway,$Subnet -NoNewWindow -wait
+    Start-Process netsh "interface ip delete dns $PrivateNIC all" -NoNewWindow -wait -RedirectStandardOutput "NUL"
 }
 
 $action = $(Test-ActionArgument)
 if ($action -eq "list") { Show-IPList }
 elseif ($action -eq "set") { Set-IP }
+elseif ($action -eq "share") { Connect-Internet}
 
 Write-Host "Done!" -ForegroundColor Green
 Pause
