@@ -47,7 +47,7 @@ function Write-AdapterNames {
     Exit
 }
 function Test-ActionArgument {
-    $ACCEPTED = @("list", "set", "del", "add", "ping", "share")
+    $ACCEPTED = @("list", "set", "del", "add", "ping", "open", "share")
     $action = $global:Arguments[0]
     if ($ACCEPTED -contains $action) { return $action }
     else {
@@ -76,7 +76,7 @@ function Test-IPSubnet($given_string){
     }
     else { return @($false, $false) }
 }
-function  Show-IPList {
+function  Show-IP {
     $NIC = ""
     if ($global:Arguments[1]) {
         $arg = $global:Arguments[1]
@@ -199,6 +199,42 @@ function Ping-IP {
     }
     Start-Process ping "-t $Destination" -NoNewWindow -Wait
 }
+
+function Open-IP {
+    $arg = $global:Arguments[1]
+    function Test-IP($given_string){
+        $ValidIpAddressRegex = [regex] "^((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))$"
+        $ValidPartialRegex = [regex]"^(25[0-4]|2[0-4][0-9]|[01]?[0-9]?[0-9])$"
+        if ($given_string -match $ValidIpAddressRegex) { return @($given_string, $false) }
+        elseif ($given_string -match $ValidPartialRegex) { return @($false, $given_string) }
+    }
+    
+    if ($null -eq $arg) { $Destination = "192.168.1.108" }
+    else {
+        $FullIP, $PartialIP = Test-IPSubnet($arg)
+        if ($FullIP) {$Destination = $FullIP }
+        elseif ($PartialIP) { $Destination = "192.168.1." + $PartialIP }
+        else { 
+            Write-Host "Invalid IP" -ForegroundColor Red
+            $Destination = "about:blank"
+        }
+    }
+
+    $browser = $null
+    if (Get-Process iexplore -ea silentlycontinue | Where-Object {$_.MainWindowTitle -ne ""}) {
+        Write-Host "IE is running"
+        $browser = (New-Object -COM "Shell.Application").Windows() | Where-Object  { $_.Name -eq "Internet Explorer" } | Select-Object -Last 1
+        Start-Sleep -milliseconds 50
+        $browser.Navigate2($Destination);
+    } else {
+        Write-Host "Launching IE"
+        $browser  = New-Object -COM "InternetExplorer.Application"
+        Start-Sleep -milliseconds 50
+        $browser.visible=$true
+        $browser.Navigate2($Destination);
+    }
+    Exit
+}
 function  Connect-Internet {
     $PublicNIC = ""
     $PrivateNIC = ""
@@ -258,11 +294,12 @@ function  Connect-Internet {
 }
 
 $action = $(Test-ActionArgument)
-if ($action -eq "list") { Show-IPList }
+if ($action -eq "list") { Show-IP }
 elseif ($action -eq "set") { Set-IP }
 elseif ($action -eq "add") { Add-IP }
 elseif ($action -eq "del") { Remove-IP }
 elseif ($action -eq "ping") { Ping-IP }
+elseif ($action -eq "open") { Open-IP }
 elseif ($action -eq "share") { Connect-Internet}
 
 Write-Host
