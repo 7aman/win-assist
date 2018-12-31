@@ -46,6 +46,7 @@ function Write-AdapterNames {
     Pause
     Exit
 }
+
 function Test-ActionArgument {
     $ACCEPTED = @("list", "set", "del", "add", "ping", "open", "share")
     $action = $global:Arguments[0]
@@ -59,11 +60,11 @@ function Test-ActionArgument {
     }
 }
 
-
 function Test-AdapterName($given_string){
     if( $(Get-NetAdapter -Name $given_string -ErrorAction SilentlyContinue -InformationAction SilentlyContinue)) { return $true }
     else { return $false }
 }
+
 function Test-IPSubnet($given_string){
     $ValidIpAddressRegex = [regex] "^((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))$"
     $ValidSubnetRegex = [regex]"^([1-9]|[1-2][0-9]?|3[0-2])$"
@@ -76,6 +77,7 @@ function Test-IPSubnet($given_string){
     }
     else { return @($false, $false) }
 }
+
 function  Show-IP {
     $NIC = ""
     if ($global:Arguments[1]) {
@@ -235,6 +237,7 @@ function Open-IP {
     }
     Exit
 }
+
 function  Connect-Internet {
     $PublicNIC = ""
     $PrivateNIC = ""
