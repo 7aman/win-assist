@@ -190,8 +190,8 @@ function Ping-IP {
     
     if ($null -eq $arg) { $Destination = "8.8.8.8" }
     else {
-        $FullIP, $PartialIP = Test-IPSubnet($arg)
-        if ($FullIP) {$Destination = $FullIP }
+        $FullIP, $PartialIP = Test-IP($arg)
+        if ($FullIP) { $Destination = $FullIP }
         elseif ($PartialIP) { $Destination = "192.168.1." + $PartialIP }
         else { 
             Write-Host "Invalid IP" -ForegroundColor Red
@@ -213,7 +213,7 @@ function Open-IP {
     
     if ($null -eq $arg) { $Destination = "192.168.1.108" }
     else {
-        $FullIP, $PartialIP = Test-IPSubnet($arg)
+        $FullIP, $PartialIP = Test-IP($arg)
         if ($FullIP) {$Destination = $FullIP }
         elseif ($PartialIP) { $Destination = "192.168.1." + $PartialIP }
         else { 
