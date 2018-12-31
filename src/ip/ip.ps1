@@ -47,7 +47,7 @@ function Write-AdapterNames {
     Exit
 }
 function Test-ActionArgument {
-    $ACCEPTED = @("list", "set", "del", "add", "share")
+    $ACCEPTED = @("list", "set", "del", "add", "ping", "share")
     $action = $global:Arguments[0]
     if ($ACCEPTED -contains $action) { return $action }
     else {
@@ -177,6 +177,28 @@ function Remove-IP {
     Start-Process netsh "interface ip delete address", $NIC, $IP -NoNewWindow -wait
 }
 
+function Ping-IP {
+    $arg = $global:Arguments[1]
+    function Test-IP($given_string){
+        $ValidIpAddressRegex = [regex] "^((?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))$"
+        $ValidPartialRegex = [regex]"^(25[0-4]|2[0-4][0-9]|[01]?[0-9]?[0-9])$"
+        if ($given_string -match $ValidIpAddressRegex) { return @($given_string, $false) }
+        elseif ($given_string -match $ValidPartialRegex) { return @($false, $given_string) }
+    }
+    
+    if ($null -eq $arg) { $Destination = "8.8.8.8" }
+    else {
+        $FullIP, $PartialIP = Test-IPSubnet($arg)
+        if ($FullIP) {$Destination = $FullIP }
+        elseif ($PartialIP) { $Destination = "192.168.1." + $PartialIP }
+        else { 
+            Write-Host "Invalid IP" -ForegroundColor Red
+            Pause
+            Exit
+        }
+    }
+    Start-Process ping "-t $Destination" -NoNewWindow -Wait
+}
 function  Connect-Internet {
     $PublicNIC = ""
     $PrivateNIC = ""
@@ -240,6 +262,7 @@ if ($action -eq "list") { Show-IPList }
 elseif ($action -eq "set") { Set-IP }
 elseif ($action -eq "add") { Add-IP }
 elseif ($action -eq "del") { Remove-IP }
+elseif ($action -eq "ping") { Ping-IP }
 elseif ($action -eq "share") { Connect-Internet}
 
 Write-Host
