@@ -48,7 +48,7 @@ function Write-AdapterNames {
 }
 
 function Test-ActionArgument {
-    $ACCEPTED = @("list", "set", "del", "add", "ping", "open", "share")
+    $ACCEPTED = @("list", "set", "del", "add", "ping", "open", "share", "port")
     $action = $global:Arguments[0]
     if ($ACCEPTED -contains $action) { return $action }
     else {
@@ -296,6 +296,38 @@ function  Connect-Internet {
     Start-Process ping "8.8.8.8" -NoNewWindow -wait
 }
 
+function Test-Port {
+    Write-host "-> Which Port are you searching for?"  -ForegroundColor Yellow 
+    do {
+        Write-host "port:"  -ForegroundColor Green -NoNewLine
+        try { [int16]$port = $(Read-Host) }
+        catch { Write-Host "Not valid (must be between 1-65535). Try again ..." }
+    } while ($port -notin 1..65535)
+
+    Write-host 
+    Write-host "Result:"  -ForegroundColor Yellow
+    netstat -abno | Select-String -pattern "Proto {1,}Local",":$port "
+
+    while ($True){
+        Write-host 
+        Write-host "-> Give a  ProcessID  to kill it or Hit <Enter> to skip"  -ForegroundColor Red
+        Write-host "PID:"  -ForegroundColor Green -NoNewLine
+        $processid = $(Read-Host)
+        if ($processid) {
+            Write-host "You selected this process to kill:"  -ForegroundColor Red
+            try{
+                Get-Process -ID $processid -ErrorAction Stop | Format-list -Property ID,ProcessName,Path
+                Write-host "Hit <Enter> to Kill or type 'c' to cancel:"  -ForegroundColor Green -NoNewLine
+                $answer = $( Read-Host)
+                if (!$answer ) { Taskkill -PID $processid -F }
+            }
+            catch { Write-host "No such Process" -ForegroundColor Red }
+        }
+        else { break }
+    } 
+}
+
+
 $action = $(Test-ActionArgument)
 if ($action -eq "list") { Show-IP }
 elseif ($action -eq "set") { Set-IP }
@@ -304,6 +336,7 @@ elseif ($action -eq "del") { Remove-IP }
 elseif ($action -eq "ping") { Ping-IP }
 elseif ($action -eq "open") { Open-IP }
 elseif ($action -eq "share") { Connect-Internet}
+elseif ($action -eq "port") { Test-port}
 
 Write-Host
 Write-Host "Done!" -ForegroundColor Green
