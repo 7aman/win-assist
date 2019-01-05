@@ -109,6 +109,9 @@ function Start-TFTP {
     Set-IP
     Get-UserCommands
     Write-UpgradeInfo
+    if ($global:Arguments[1] -eq "open") {
+        Invoke-Item $(Split-Path $global:outPath -Parent)
+    }
 }
 
 function Reset-Configs {
