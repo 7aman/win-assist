@@ -70,7 +70,7 @@ function Get-UserCommands {
 
 function Write-ResetCommands {
     $usercommand = 'cfgRestore'
-    Out-File -FilePath $global:txtPath -InputObject $usercommand -Encoding ASCII -Append -NoNewLine
+    Out-File -FilePath $global:txtPath -InputObject $usercommand -Encoding ASCII -NoNewLine
     Write-host "'upgrade_info_7db780a713a4.txt' is created successfully" -ForegroundColor Yellow
 	Write-host
 }
