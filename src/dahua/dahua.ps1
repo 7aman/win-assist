@@ -71,6 +71,7 @@ function Get-UserCommands {
 function Write-ResetCommands {
     $usercommand = 'cfgRestore'
     Out-File -FilePath $global:txtPath -InputObject $usercommand -Encoding ASCII -NoNewLine
+    Start-Process -FilePath $global:exePath -Args "$global:txtPath $global:outPath" -wait -NoNewWindow
     Write-host "'upgrade_info_7db780a713a4.txt' is created successfully" -ForegroundColor Yellow
 	Write-host
 }
