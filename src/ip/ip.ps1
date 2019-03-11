@@ -114,7 +114,7 @@ function  Set-IP {
     if (!$SUB) { $SUB = 24 }
     if (!$NIC) { $NIC = "Ethernet" }
     if (!$IPS) {
-        $IPS += "192.168.1.199"
+        $IPS += "192.168.1.1"
         $IPS += " "
     }
     if (!$IPS[1]) { $IPS += " " }
@@ -152,7 +152,7 @@ function Add-IP {
     if (!$SUB) { $SUB = 24 }
     if (!$NIC) { $NIC = "Ethernet" }
     if (!$IPS) {
-        $IPS += "192.168.1.199"
+        $IPS += "192.168.1.1"
         $IPS += " "
     }
     if (!$IPS[1]) { $IPS += " " }
@@ -172,7 +172,7 @@ function Remove-IP {
         if (!$IP) { $IP = $eIP }
     }
     if (!$NIC) { $NIC = "Ethernet" }
-    if (!$IP) { $IP = "192.168.1.199" }
+    if (!$IP) { $IP = "192.168.1.1" }
 
     Write-Host "Delete IP Address using this command:" -ForegroundColor Green
     Write-Host "    netsh interface ip delete address", $NIC, $IP
@@ -257,7 +257,7 @@ function  Connect-Internet {
     if (!$PublicNIC) { $PublicNIC = "Wi-Fi" }
     if (!$PrivateNIC) { $PrivateNIC = "Ethernet" }
     if (!$PrivateSubnet) { $PrivateSubnet = 24 }
-    if (!$PrivateGateway) { $PrivateGateway = "192.168.1.199" }
+    if (!$PrivateGateway) { $PrivateGateway = "192.168.1.1" }
 
     # Constants
     $public = 0 
@@ -286,7 +286,7 @@ function  Connect-Internet {
     $netshare.INetSharingConfigurationForINetConnection($privateadapter).EnableSharing($private)
 
 
-    # Default IP of private NIC is '192.168.137.1', not very common range. I like to change it to '192.168.1.199'
+    # Default IP of private NIC is '192.168.137.1', not very common range. I like to change it to '192.168.1.1'
     Write-host "Setting IP Address of '$PrivateNIC' to '$PrivateGateway' / '$PrivateSubnet'" -ForegroundColor Yellow 
     $Subnet = $global:SUBNETS[$PrivateSubnet]
     Start-Process netsh "interface ip set address",$PrivateNIC,"static",$PrivateGateway,$Subnet -NoNewWindow -wait
