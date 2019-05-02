@@ -14,10 +14,11 @@ $global:txtPath = "$PSScriptRoot\tftp\commands.txt"
 $global:outPath = "$PSScriptRoot\tftp\root\upgrade_info_7db780a713a4.txt"
 $global:consolePath = "$PSScriptRoot\tftp\console.bat"
 $global:tftpPath = "$PSScriptRoot\tftp\tftp.bat"
+$global:rootPath = "$PSScriptRoot\tftp\root"
 
 
 function Test-Argument {
-    $ACCEPTED = @("tftp", "reset", "again")
+    $ACCEPTED = @("tftp", "reset", "again", "root")
     $action = $global:Arguments[0]
     if ($ACCEPTED -contains $action) { return $action }
     else {
@@ -121,10 +122,16 @@ function Reset-Configs {
     Write-ResetCommands
 }
 
+function Open-Root {
+    Invoke-Item $global:rootPath
+    Exit
+}
+
 $action = $(Test-Argument)
 if ($action -eq "tftp") {Start-TFTP }
 elseif ($action -eq "reset") { Reset-Configs }
 elseif ($action -eq "again") { Set-IP }
+elseif ($action -eq "root") { Open-Root }
 
 Stop-OldProcess
 Invoke-Console
