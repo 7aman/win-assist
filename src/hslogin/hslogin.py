@@ -4,7 +4,6 @@ import json
 from pathlib import Path
 from getpass import getpass
 import requests
-from requests.adapters import HTTPAdapter
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
@@ -30,50 +29,52 @@ username = settings["username"]
 password = settings["password"]
 ifname = settings["ifname"]
 profile = settings["profile"]
-s = requests.Session()
-s.mount(url, HTTPAdapter(max_retries=1))
 
-logged_in = False
-while not logged_in:
+
+
+
+def is_available(url):
+	print(f"\nChecking {url}")
 	try:
-		if requests.head("https://example.com").status_code == 200:
-			result = "\tAlready logged in ..."
-			logged_in = True
-			break
-		status = requests.get(url).status_code
-		if status == 200:
-			options = Options()
-			options.headless = True
-			# options.add_argument('log-level=3')
-			# options.add_argument("--disable-logging")
-			options.add_experimental_option('excludeSwitches', ['enable-logging'])
-			browser = webdriver.Chrome(options=options)
-			print("\nOpenning login page headlessly by Chrome...")
-			browser.get(url)
-			if browser.find_elements_by_css_selector('input[value="log off"]'):
-				result = "\tAlready logged in ..."
-				logged_in = True
-			elif browser.find_elements_by_css_selector('input[value="OK"]'):
-				elem = browser.find_elements_by_name('username') 
-				elem[1].send_keys(username)
-				elem = browser.find_elements_by_name('password') 
-				elem[1].send_keys(password + Keys.RETURN)
-				result = "\tUser '" + username + "' successfully logged in."
-				logged_in = True
-			else:
-				result = "\tSomething is wrong..."
-			browser.quit()
-		else:
-			print(f"status code: {status}")
-			result = "\tServer is not responding..."
+		if requests.get(url, timeout=1.0).status_code == 200:
+			print("\tOK!")
+			return True
 	except Exception:
-		result = "\tServer is not responding. Checking wifi"
-		os.system(f"powershell .\WiFi.ps1 {ifname} '{profile}'")
+		pass
+	print("\tNot Responding.")
+	return False
 
-	print()
-	print("Result:")
-	print(result)
+def check_wifi(ifname, profile, iteration):
+	if iteration:
+		os.system(f"powershell .\WiFi.ps1 {ifname} '{profile}' {True}")
+	else:
+		os.system(f"powershell .\WiFi.ps1 {ifname} '{profile}' {False}")
 
-print("\nPing Result:")
+def login(url, username, password):
+	options = Options()
+	options.headless = True
+	options.add_experimental_option('excludeSwitches', ['enable-logging'])
+	browser = webdriver.Chrome(options=options)
+	print("\nLogin headlessly via Chrome...")
+	browser.get(url)
+	if browser.find_elements_by_css_selector('input[value="OK"]'):
+		elem = browser.find_elements_by_name('username') 
+		elem[1].send_keys(username)
+		elem = browser.find_elements_by_name('password') 
+		elem[1].send_keys(password + Keys.RETURN)
+	elif browser.find_elements_by_css_selector('input[value="log off"]'):
+		print("\tAlready logged-in")
+	browser.quit()
+
+max_try = 10
+iteration = 0
+while iteration < max_try:
+	if is_available("https://example.com"):
+		break
+	if is_available(url):
+		login(url, username, password)
+	else:
+		check_wifi(ifname, profile, iteration)
+	iteration += 1	
 os.system("ping 8.8.8.8")
 
