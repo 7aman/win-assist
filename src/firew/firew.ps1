@@ -1,6 +1,8 @@
 if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")){ 
 	Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs; exit 
-}function print_help {
+}
+
+function Write-Help {
     Write-Host  "Usage:"  -ForegroundColor Green
     Write-Host  "   firew on"  -ForegroundColor Green
     Write-Host  "               : to enable firewalls"  -ForegroundColor Green
@@ -8,6 +10,7 @@ if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
     Write-Host  "               : to disable firewalls"  -ForegroundColor Green
     Write-Host "*****************************************"
 }
+
 Switch ($args[0]) {
     "on" {
         Write-Host  "Enabling Firewall..."  -ForegroundColor Yellow
@@ -20,9 +23,9 @@ Switch ($args[0]) {
         Write-Host "Done!" -ForegroundColor Red
     }
     default{
-        print_help
+        Write-Help
     }
 }
-# Pause
 Timeout /T 5
+# Pause
 Exit

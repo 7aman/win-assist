@@ -1,7 +1,7 @@
 if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")){ 
 	Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs; exit 
 }
-function print_help {
+functionWrite-Help {
     Write-Host  "Usage:"  -ForegroundColor Green
     Write-Host  "   avirus on"  -ForegroundColor Green
     Write-Host  "               : to enable antivirus"  -ForegroundColor Green
@@ -22,8 +22,9 @@ Switch ($args[0]) {
         Write-Host  "Done!"  -ForegroundColor Red
      }
     default {
-        print_help
+        Write-Help
     }
 }
 Timeout /T 5
-
+# Pause
+Exit

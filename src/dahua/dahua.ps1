@@ -164,4 +164,5 @@ Invoke-TFTP
 Write-host "Power on your device!" -ForegroundColor Red
 Write-host
 Timeout /T 5
+# Pause
 Exit
