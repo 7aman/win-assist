@@ -6,3 +6,4 @@ test.ps1
 src/hslogin/credentials.json
 src/dahua/tftp/root
 src/dahua/tftp/commands.txt
+src/uart/logs/*.log
