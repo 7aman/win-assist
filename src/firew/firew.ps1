@@ -23,4 +23,6 @@ Switch ($args[0]) {
         print_help
     }
 }
-Pause
+# Pause
+Timeout /T 5
+Exit

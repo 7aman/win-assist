@@ -340,4 +340,6 @@ elseif ($action -eq "port") { Test-port}
 
 Write-Host
 Write-Host "Done!" -ForegroundColor Green
-Pause
+# Pause
+Timeout /T 5
+Exit

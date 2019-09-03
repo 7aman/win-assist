@@ -18,8 +18,9 @@ $global:rootPath = "$PSScriptRoot\tftp\root"
 
 
 function Test-Argument {
-    $ACCEPTED = @("tftp", "reset", "again", "root")
+    $ACCEPTED = @("tftp", "reset", "again", "root", "info")
     $action = $global:Arguments[0]
+    # Write-Host "1"
     if ($ACCEPTED -contains $action) { return $action }
     else {
         Write-Host "Invalid action argument."
@@ -37,7 +38,7 @@ function Set-IP {
     Start-Process netsh "interface ip add address $global:NIC 192.168.254.254 255.255.0.0" -NoNewWindow | Wait-Job | out-null
     Write-host "    IP is set successfully" -ForegroundColor Yellow
     Set-MpPreference -DisableRealtimeMonitoring $true | Wait-Job
-    Write-host "    'Real-time Protection' for Michrosoft Windows Defender Anti-Virus is disabled successfully" -ForegroundColor Yellow
+    Write-host "    'Real-time Protection' for Microsoft Windows Defender Anti-Virus is disabled successfully" -ForegroundColor Yellow
     Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled False | Wait-Job
     Write-host "    'Firewall' is disabled successfully" -ForegroundColor Yellow
     Write-Host
@@ -77,12 +78,20 @@ function Write-ResetCommands {
 	Write-host
 }
 
+function Write-InfoCommands {
+    $newline = "`n"
+    $usercommands = @('printenv', 'help', 'info')
+    Out-File -FilePath $global:txtPath -InputObject $usercommands[0] -Encoding ASCII -NoNewline
+    foreach ($command in $usercommands[1..$usercommands.Length]) {
+        Out-File -FilePath $global:txtPath -InputObject $newline -Encoding ASCII -Append -NoNewLine
+        Out-File -FilePath $global:txtPath -InputObject $command -Encoding ASCII -Append -NoNewline
+    }
+    Start-Process -FilePath $global:exePath -Args "$global:txtPath $global:outPath" -wait -NoNewWindow
+    Write-host "'upgrade_info_7db780a713a4.txt' is created successfully" -ForegroundColor Yellow
+	Write-host
+}
 
 function Write-UpgradeInfo {
-    if (!(Test-Path $(Split-Path $global:outPath -Parent) -PathType Container)) {
-        Write-Host "    Creating 'root' directory for tftp..."
-        New-Item -ItemType Directory -Force -Path $(Split-Path $global:outPath -Parent) | Out-Null
-    }
     Start-Process -FilePath $global:exePath -Args "$global:txtPath $global:outPath" -wait -NoNewWindow
     Write-host "'upgrade_info_7db780a713a4.txt' is created successfully" -ForegroundColor Yellow
 	Write-host
@@ -127,11 +136,27 @@ function Open-Root {
     Exit
 }
 
+function Get-Info {
+    Set-IP
+    Write-InfoCommands
+}
+
+function Set-RootDir {
+    if (!(Test-Path $(Split-Path $global:outPath -Parent) -PathType Container)) {
+        Write-Host "    Creating 'root' directory for tftp..."
+        New-Item -ItemType Directory -Force -Path $(Split-Path $global:outPath -Parent) | Out-Null
+    }
+}
+
 $action = $(Test-Argument)
+Set-RootDir
+
 if ($action -eq "tftp") {Start-TFTP }
 elseif ($action -eq "reset") { Reset-Configs }
 elseif ($action -eq "again") { Set-IP }
 elseif ($action -eq "root") { Open-Root }
+elseif ($action -eq "info") { Get-Info }
+
 
 Stop-OldProcess
 Invoke-Console

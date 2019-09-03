@@ -12,12 +12,12 @@ function print_help {
 
 Switch ($args[0]) {
     "on" {
-        Write-Host  "Enabling 'Real-time Protection' for Michrosoft Windows Defender Anti-Virus..."  -ForegroundColor Yellow
+        Write-Host  "Enabling 'Real-time Protection' for Microsoft Windows Defender Anti-Virus..."  -ForegroundColor Yellow
         Set-MpPreference -DisableRealtimeMonitoring $false | Wait-Job
         Write-Host  "Done!"  -ForegroundColor Green
     }
     "off"   {
-        Write-Host  "Disabling 'Real-time Protection' for Michrosoft Windows Defender Anti-Virus..."  -ForegroundColor Yellow
+        Write-Host  "Disabling 'Real-time Protection' for Microsoft Windows Defender Anti-Virus..."  -ForegroundColor Yellow
         Set-MpPreference -DisableRealtimeMonitoring $true | Wait-Job
         Write-Host  "Done!"  -ForegroundColor Red
      }
@@ -25,5 +25,5 @@ Switch ($args[0]) {
         print_help
     }
 }
-Pause
+Timeout /T 5
 
