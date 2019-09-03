@@ -16,7 +16,7 @@ param(
 For example, '-sercfg 19200,8,n,1,N' denotes a baud rate of 19200, 8 data bits, no parity, 1 stop bit and no flow control. 
 #>
 
-function Print-Help {
+function Write-Help {
 	Write-Host "TODO"
 }
 function Stop-OldProcess {
@@ -37,7 +37,8 @@ function Start-Putty ($arguments) {
 function Start-PLink ($arguments) {
 	$logfile = ".\logs\uart-" + $(get-date -f yyyyMMdd-HHmmss) + ".log"
 	New-Item -ItemType Directory -Force -Path $(Split-Path $logfile -Parent) | Out-Null
-    Start-Process "powershell.exe" -ArgumentList ".\plink\plink.exe",$arguments," | Tee-Object $logfile" 
+	Start-Process "powershell.exe" -ArgumentList ".\plink\plink.exe",$arguments," | Tee-Object $logfile"
+	Invoke-Item -Path $(Split-Path $logfile -Parent)
 }
 
 Push-Location -Path "$PSScriptRoot"
@@ -51,7 +52,7 @@ elseif ($app -eq "plink") {
 	Start-PLink $arguments
 }
 else {
-	Print-Help
+	Write-Help
 }
 
 Exit
