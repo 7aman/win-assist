@@ -48,7 +48,7 @@ function Write-AdapterNames {
 }
 
 function Test-ActionArgument {
-    $ACCEPTED = @("list", "set", "del", "add", "ping", "open", "share", "port")
+    $ACCEPTED = @("list", "set", "del", "add", "ping", "open", "share", "port", "login")
     $action = $global:Arguments[0]
     if ($ACCEPTED -contains $action) { return $action }
     else {
@@ -327,6 +327,13 @@ function Test-Port {
     } 
 }
 
+function Connect-HotSpot {
+    Push-Location -Path "$PSScriptRoot\login"
+    python .\login.py
+    Write-Host ""
+    Write-Host ""
+}
+
 
 $action = $(Test-ActionArgument)
 if ($action -eq "list") { Show-IP }
@@ -335,8 +342,9 @@ elseif ($action -eq "add") { Add-IP }
 elseif ($action -eq "del") { Remove-IP }
 elseif ($action -eq "ping") { Ping-IP }
 elseif ($action -eq "open") { Open-IP }
-elseif ($action -eq "share") { Connect-Internet}
-elseif ($action -eq "port") { Test-port}
+elseif ($action -eq "share") { Connect-Internet }
+elseif ($action -eq "port") { Test-port }
+elseif ($action -eq "login") { Connect-HotSpot }
 
 Write-Host
 Write-Host "Done!" -ForegroundColor Green

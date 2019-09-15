@@ -31,8 +31,6 @@ ifname = settings["ifname"]
 profile = settings["profile"]
 
 
-
-
 def is_available(url):
 	print(f"\nChecking {url}")
 	try:
@@ -77,4 +75,3 @@ while iteration < max_try:
 		check_wifi(ifname, profile, iteration)
 	iteration += 1	
 os.system("ping 8.8.8.8")
-

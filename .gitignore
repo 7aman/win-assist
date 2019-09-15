@@ -3,7 +3,7 @@
 test.ps1
 .vscode
 *.lnk
-src/hslogin/credentials.json
+src/ip/login/credentials.json
 src/dahua/tftp/root
 src/dahua/tftp/commands.txt
 src/uart/logs/*.log
