@@ -300,7 +300,7 @@ function Test-Port {
     Write-host "-> Which Port are you searching for?"  -ForegroundColor Yellow 
     do {
         Write-host "port:"  -ForegroundColor Green -NoNewLine
-        try { [int16]$port = $(Read-Host) }
+        try { [UInt16]$port = $(Read-Host) }
         catch { Write-Host "Not valid (must be between 1-65535). Try again ..." }
     } while ($port -notin 1..65535)
 
