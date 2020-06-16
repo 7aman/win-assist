@@ -50,7 +50,7 @@ def check_wifi(ifname, profile, iteration):
 
 def login(url, username, password):
 	options = Options()
-	# options.headless = True
+	options.headless = True
 	options.add_experimental_option('excludeSwitches', ['enable-logging'])
 	browser = webdriver.Chrome(options=options)
 	print("\nLogin headlessly via Chrome...")
