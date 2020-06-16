@@ -44,13 +44,13 @@ def is_available(url):
 
 def check_wifi(ifname, profile, iteration):
 	if iteration:
-		os.system(f"powershell .\WiFi.ps1 {ifname} '{profile}' {True}")
+		os.system(f"powershell .\\WiFi.ps1 {ifname} '{profile}' {True}")
 	else:
-		os.system(f"powershell .\WiFi.ps1 {ifname} '{profile}' {False}")
+		os.system(f"powershell .\\WiFi.ps1 {ifname} '{profile}' {False}")
 
 def login(url, username, password):
 	options = Options()
-	options.headless = True
+	# options.headless = True
 	options.add_experimental_option('excludeSwitches', ['enable-logging'])
 	browser = webdriver.Chrome(options=options)
 	print("\nLogin headlessly via Chrome...")
