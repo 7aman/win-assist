@@ -1,6 +1,11 @@
 if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")){ 
 	Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs; exit 
 }
+# $navOpenInNewWindow = 1
+$navOpenInNewTab = 2048
+# $navOpenInBackgroundTab = 4096
+# $navOpenNewForegroundTab = 65536
+
 $global:SUBNETS = @(
     "255.255.255.0",
     "128.0.0.0",
@@ -226,15 +231,13 @@ function Open-IP {
     if (Get-Process iexplore -ea silentlycontinue | Where-Object {$_.MainWindowTitle -ne ""}) {
         Write-Host "IE is running"
         $browser = (New-Object -COM "Shell.Application").Windows() | Where-Object  { $_.Name -eq "Internet Explorer" } | Select-Object -Last 1
-        Start-Sleep -milliseconds 50
-        $browser.Navigate2($Destination);
     } else {
         Write-Host "Launching IE"
         $browser  = New-Object -COM "InternetExplorer.Application"
-        Start-Sleep -milliseconds 50
-        $browser.visible=$true
-        $browser.Navigate2($Destination);
     }
+    Start-Sleep -milliseconds 50
+    $browser.visible=$true
+    $browser.Navigate2($Destination, $navOpenInNewTab);
     Exit
 }
 
